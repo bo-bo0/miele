@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="it" data-font-size="large">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I Parametri Vitali</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* -------------------------------------------------------------
+       FONT SIZE SCALING & ACCESSIBILITY SYSTEM
+       Default: 'large' (21px root) for optimal readability.
+    ------------------------------------------------------------- */
+    html {
+      font-size: 21px;
+      scroll-behavior: smooth;
+    }
+
+    html[data-font-size="normal"] {
+      font-size: 18px;
+    }
+
+    html[data-font-size="large"] {
+      font-size: 21px;
+    }
+
+    html[data-font-size="xlarge"] {
+      font-size: 25px;
+    }
+
+    /* -------------------------------------------------------------
+       COLOR PALETTE & VARIABLES (HIGH CONTRAST DARK THEME)
+    ------------------------------------------------------------- */
+    :root {
+      --bg-body: #070b13;
+      --bg-surface: #0e1526;
+      --bg-surface-elevated: #152038;
+      --bg-card: rgba(18, 28, 50, 0.85);
+      --bg-card-hover: rgba(24, 38, 68, 0.95);
+      
+      --border-color: rgba(255, 255, 255, 0.14);
+      --border-bright: rgba(255, 255, 255, 0.28);
+      
+      --text-main: #ffffff;
+      --text-muted: #e2e8f0;
+      --text-subtle: #cbd5e1;
+      
+      --c-heart: #fb7185;
+      --c-resp: #38bdf8;
+      --c-pressure: #a78bfa;
+      --c-temp: #fbbf24;
+      --c-spo2: #34d399;
+      --c-pain: #f472b6;
+      --c-imc: #60a5fa;
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      
+      --shadow-card: 0 12px 36px -10px rgba(0, 0, 0, 0.7);
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.8;
+      font-weight: 450;
+      letter-spacing: 0.012em;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 15% 15%, rgba(244, 63, 94, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 60%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 80% 85%, rgba(16, 185, 129, 0.07) 0%, transparent 40%);
+    }
+
+    .reading-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--c-heart), var(--c-resp), var(--c-pressure), var(--c-temp), var(--c-spo2));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: rgba(12, 19, 36, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 1.5rem;
+    }
+
+    .nav-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.25), rgba(6, 182, 212, 0.25));
+      border: 1px solid var(--border-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--c-heart);
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      list-style: none;
+      overflow-x: auto;
+      padding: 0.35rem 0;
+      scrollbar-width: thin;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 650;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      transition: var(--transition);
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-color);
+    }
+
+    .controls-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .font-size-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--bg-surface-elevated);
+      padding: 0.25rem 0.4rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-bright);
+    }
+
+    .font-control-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-subtle);
+      padding: 0 0.4rem;
+    }
+
+    .btn-font-size {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 800;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 0.25rem 0.6rem;
+      transition: var(--transition);
+      font-family: inherit;
+      line-height: 1;
+    }
+
+    .btn-font-size#fs-normal { font-size: 0.85rem; }
+    .btn-font-size#fs-large { font-size: 1rem; }
+    .btn-font-size#fs-xlarge { font-size: 1.15rem; }
+
+    .btn-font-size:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-font-size.active {
+      background: var(--c-resp);
+      color: #070b13;
+      border-color: var(--c-resp);
+      font-weight: 800;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--bg-surface-elevated);
+      color: #ffffff;
+      border: 1px solid var(--border-bright);
+      padding: 0.5rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: #ffffff;
+    }
+
+    .hero-section {
+      position: relative;
+      padding: 4.5rem 1.5rem 2.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 1.2rem;
+      border-radius: 999px;
+      background: rgba(244, 63, 94, 0.18);
+      border: 1px solid rgba(244, 63, 94, 0.45);
+      color: #fecdd3;
+      font-size: 0.9rem;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.25rem;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--c-heart);
+      border-radius: 50%;
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      margin-bottom: 1.25rem;
+      color: #ffffff;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+      color: var(--text-muted);
+      max-width: 860px;
+      margin: 0 auto 2.5rem;
+      font-weight: 450;
+      line-height: 1.7;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.15rem;
+      margin-top: 1.5rem;
+    }
+
+    .metric-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.15rem;
+      text-align: left;
+      transition: var(--transition);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-pill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-color, #38bdf8);
+    }
+
+    .metric-pill:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-color, #38bdf8);
+      transform: translateY(-3px);
+    }
+
+    .metric-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.45rem;
+    }
+
+    .metric-label {
+      font-size: 0.88rem;
+      font-weight: 750;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .metric-val span {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-subtle);
+    }
+
+    .metric-desc {
+      font-size: 0.9rem;
+      color: var(--text-subtle);
+      margin-top: 0.4rem;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      margin-top: 4.5rem;
+      scroll-margin-top: 6.5rem;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-color, var(--c-resp));
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .section-lead {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 900px;
+      margin-top: 0.65rem;
+      line-height: 1.75;
+      font-weight: 450;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .callout {
+      border-left: 5px solid var(--accent-color, var(--c-resp));
+      background: rgba(255, 255, 255, 0.04);
+      padding: 1.4rem 1.6rem;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      margin: 1.5rem 0;
+    }
+
+    .callout-title {
+      font-size: 1.15rem;
+      font-weight: 750;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .callout p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 750;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-normal {
+      background: rgba(16, 185, 129, 0.22);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.22);
+      color: #fde047;
+      border: 1px solid rgba(245, 158, 11, 0.5);
+    }
+
+    .badge-alert {
+      background: rgba(244, 63, 94, 0.22);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.5);
+    }
+
+    .badge-info {
+      background: rgba(6, 182, 212, 0.22);
+      color: #7dd3fc;
+      border: 1px solid rgba(6, 182, 212, 0.5);
+    }
+
+    .compare-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 720px) {
+      .compare-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.6rem;
+      transition: var(--transition);
+    }
+
+    .compare-box.tachi {
+      border-top: 4px solid var(--c-heart);
+    }
+
+    .compare-box.bradi {
+      border-top: 4px solid var(--c-resp);
+    }
+
+    .compare-box h4 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    .compare-box p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      margin: 1.5rem 0;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: var(--bg-surface-elevated);
+      color: #ffffff;
+      font-weight: 800;
+      padding: 1.1rem 1.3rem;
+      border-bottom: 2px solid var(--border-bright);
+      text-transform: uppercase;
+      font-size: 0.92rem;
+      letter-spacing: 0.06em;
+    }
+
+    table.data-table td {
+      padding: 1.15rem 1.3rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-size: 1.08rem;
+      line-height: 1.65;
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .table-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .terms-tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .term-tag {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-bright);
+      color: #ffffff;
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .term-tag:hover {
+      border-color: var(--c-resp);
+      background: rgba(56, 189, 248, 0.15);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    .sheet-card {
+      background: #0d1424;
+      border: 2px dashed rgba(255, 255, 255, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .sheet-field {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-sm);
+      padding: 1.15rem;
+    }
+
+    .sheet-field-title {
+      font-size: 0.9rem;
+      font-weight: 750;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .sheet-field-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--border-bright);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.15rem;
+      padding: 0.5rem 0;
+      margin-top: 0.4rem;
+      outline: none;
+    }
+
+    .sheet-field-input:focus {
+      border-color: var(--c-resp);
+    }
+
+    footer.site-footer {
+      border-top: 1px solid var(--border-color);
+      background: #05080f;
+      padding: 3rem 1.5rem 2rem;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #111827 !important;
+      }
+      .bg-mesh, .reading-bar, .site-header, .btn-action {
+        display: none !important;
+      }
+      .card, .compare-box, .metric-pill, .table-wrapper, .sheet-card {
+        border-color: #cbd5e1 !important;
+        background: #ffffff !important;
+        color: #111827 !important;
+        box-shadow: none !important;
+      }
+      .hero-title {
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-mesh" aria-hidden="true"></div>
+  <div class="reading-bar" id="readingBar" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="#top" class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            <path d="M3.22 12H9.5l1.5-3 2 6 1.5-3h4.78"/>
+          </svg>
+        </div>
+        <span>I PARAMETRI VITALI</span>
+      </a>
+
+      <div class="controls-wrapper">
+        <div class="font-size-control" role="group" aria-label="Regola dimensione testo">
+          <span class="font-control-label">Carattere:</span>
+          <button class="btn-font-size" id="fs-normal" onclick="setFontSize('normal')" title="Carattere Standard (18px)">A</button>
+          <button class="btn-font-size active" id="fs-large" onclick="setFontSize('large')" title="Carattere Grande (21px)">A+</button>
+          <button class="btn-font-size" id="fs-xlarge" onclick="setFontSize('xlarge')" title="Carattere Molto Grande (25px)">A++</button>
+        </div>
+
+        <button class="btn-action" onclick="window.print()" title="Stampa o salva come PDF">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          <span>Stampa / PDF</span>
+        </button>
+      </div>
+
+      <nav style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 0.5rem; margin-top: 0.25rem;">
+        <ul class="nav-links">
+          <li><a href="#cosa-sono" class="nav-link">1. Che cosa sono</a></li>
+          <li><a href="#frequenza-cardiaca" class="nav-link">2. Frequenza cardiaca</a></li>
+          <li><a href="#frequenza-respiratoria" class="nav-link">3. Frequenza respiratoria</a></li>
+          <li><a href="#pressione-arteriosa" class="nav-link">4. Pressione arteriosa</a></li>
+          <li><a href="#temperatura" class="nav-link">5. Temperatura corporea</a></li>
+          <li><a href="#saturazione" class="nav-link">6. Saturazione ossigeno</a></li>
+          <li><a href="#dolore" class="nav-link">7. Il dolore</a></li>
+          <li><a href="#attivita-fisica-imc" class="nav-link">8. Attività fisica & IMC</a></li>
+          <li><a href="#riepilogo" class="nav-link">Schema riepilogativo</a></li>
+          <li><a href="#termini" class="nav-link">Termini fondamentali</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero-section" id="top">
+    <div class="badge-pill">
+      <div class="pulse-dot"></div>
+      Relazione Parametri Vitali
+    </div>
+    <h1 class="hero-title">I PARAMETRI VITALI</h1>
+    <p class="hero-subtitle">
+      I parametri vitali sono indicatori che permettono di controllare alcune delle principali funzioni dell'organismo e di valutare le condizioni di salute di una persona.
+    </p>
+
+    <div class="metric-grid">
+      <a href="#frequenza-cardiaca" class="metric-pill" style="--accent-color: var(--c-heart);">
+        <div class="metric-header">
+          <span class="metric-label">Frequenza Cardiaca</span>
+        </div>
+        <div class="metric-val">60-100 <span>battiti/min</span></div>
+        <div class="metric-desc">Adulto: 60-80 battiti/min</div>
+      </a>
+
+      <a href="#frequenza-respiratoria" class="metric-pill" style="--accent-color: var(--c-resp);">
+        <div class="metric-header">
+          <span class="metric-label">Frequenza Respiratoria</span>
+        </div>
+        <div class="metric-val">12-20 <span>atti/min</span></div>
+        <div class="metric-desc">Misurata a riposo</div>
+      </a>
+
+      <a href="#pressione-arteriosa" class="metric-pill" style="--accent-color: var(--c-pressure);">
+        <div class="metric-header">
+          <span class="metric-label">Pressione Arteriosa</span>
+        </div>
+        <div class="metric-val">120/80 <span>mmHg</span></div>
+        <div class="metric-desc">Massima / Minima</div>
+      </a>
+
+      <a href="#temperatura" class="metric-pill" style="--accent-color: var(--c-temp);">
+        <div class="metric-header">
+          <span class="metric-label">Temperatura</span>
+        </div>
+        <div class="metric-val">36,5-37 <span>°C</span></div>
+        <div class="metric-desc">Febbre: da circa 37,5 °C / 38 °C</div>
+      </a>
+
+      <a href="#saturazione" class="metric-pill" style="--accent-color: var(--c-spo2);">
+        <div class="metric-header">
+          <span class="metric-label">Saturazione Ossigeno</span>
+        </div>
+        <div class="metric-val">95-100 <span>%</span></div>
+        <div class="metric-desc">Saturimetro (ossimetro)</div>
+      </a>
+
+      <a href="#dolore" class="metric-pill" style="--accent-color: var(--c-pain);">
+        <div class="metric-header">
+          <span class="metric-label">Il Dolore</span>
+        </div>
+        <div class="metric-val" style="font-size: 1.25rem;">Soggettivo</div>
+        <div class="metric-desc">Acuto o cronico</div>
+      </a>
+    </div>
+  </section>
+
+  <main class="container">
+
+    <!-- SEZIONE 1 -->
+    <section id="cosa-sono">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-resp);">
+          <span>01</span> // INTRODUZIONE
+        </div>
+        <h2 class="section-title">1. Che cosa sono i parametri vitali?</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.5rem;">
+          I parametri vitali sono indicatori che permettono di controllare alcune delle principali funzioni dell'organismo e di valutare le condizioni di salute di una persona.
+        </p>
+
+        <p style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem; color: #ffffff;">
+          I principali parametri vitali sono:
+        </p>
+
+        <div class="card-grid-3">
+          <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.35); border-radius: var(--radius-md); padding: 1.4rem;">
+            <div style="color: #fda4af; font-weight: 800; font-size: 1.2rem; margin-bottom: 0.35rem;">• Frequenza cardiaca</div>
+          </div>
+
+          <div style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.35); border-radius: var(--radius-md); padding: 1.4rem;">
+            <div style="color: #7dd3fc; font-weight: 800; font-size: 1.2rem; margin-bottom: 0.35rem;">• Frequenza respiratoria</div>
+          </div>
+
+          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.35); border-radius: var(--radius-md); padding: 1.4rem;">
+            <div style="color: #c4b5fd; font-weight: 800; font-size: 1.2rem; margin-bottom: 0.35rem;">• Pressione arteriosa</div>
+          </div>
+
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: var(--radius-md); padding: 1.4rem;">
+            <div style="color: #fde047; font-weight: 800; font-size: 1.2rem; margin-bottom: 0.35rem;">• Temperatura corporea</div>
+          </div>
+
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md); padding: 1.4rem;">
+            <div style="color: #6ee7b7; font-weight: 800; font-size: 1.2rem; margin-bottom: 0.35rem;">• Saturazione dell'ossigeno nel sangue</div>
+          </div>
+
+          <div style="background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.35); border-radius: var(--radius-md); padding: 1.4rem;">
+            <div style="color: #f472b6; font-weight: 800; font-size: 1.2rem; margin-bottom: 0.35rem;">• Dolore</div>
+          </div>
+        </div>
+
+        <div class="callout" style="--accent-color: var(--c-resp); margin-top: 1.75rem;">
+          <p>
+            Questi parametri possono essere monitorati autonomamente, utilizzando appositi strumenti oppure attraverso semplici misurazioni.
+          </p>
+          <p style="margin-top: 0.85rem;">
+            Conoscere i parametri vitali è importante perché permette di riconoscere eventuali alterazioni del funzionamento dell'organismo.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEZIONE 2 -->
+    <section id="frequenza-cardiaca">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-heart);">
+          <span>02</span> // CUORE & CIRCOLAZIONE
+        </div>
+        <h2 class="section-title">2. La frequenza cardiaca</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          La frequenza cardiaca è il numero di battiti compiuti dal cuore in un minuto, misurati in condizioni di riposo.
+        </p>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          In un soggetto normale, soprattutto durante l'adolescenza, la frequenza cardiaca a riposo è generalmente compresa tra <strong>60 e 100 battiti al minuto</strong>.
+        </p>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.75rem;">
+          Con la crescita e lo sviluppo dell'organismo, la frequenza cardiaca tende a stabilizzarsi. In un adulto, i valori medi sono generalmente più vicini ai <strong>60-80 battiti al minuto</strong>.
+        </p>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-bright); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 2rem;">
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">L'influenza dell'attività fisica sul cuore</h3>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+            Il cuore è un muscolo e, come gli altri muscoli dell'organismo, si sviluppa attraverso l'allenamento.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+            L'attività fisica regolare, come correre, praticare calcio, pallavolo oppure svolgere lavori fisicamente impegnativi, contribuisce allo sviluppo del muscolo cardiaco.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+            Quando il cuore diventa più grande e aumenta la quantità di fibre muscolari, riesce a spingere una maggiore quantità di sangue nell'aorta a ogni contrazione.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+            Di conseguenza, per svolgere la propria funzione, ha bisogno di compiere un numero inferiore di battiti.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+            Per esempio, una persona allenata potrebbe presentare una frequenza cardiaca di <strong>54 battiti al minuto</strong>, inferiore a quella di una persona sedentaria.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin: 0;">
+            In un cuore allenato, le fibre muscolari risultano maggiormente sviluppate rispetto a quelle di un cuore poco allenato.
+          </p>
+        </div>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">Tachicardia e bradicardia</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          In base alla frequenza cardiaca si possono distinguere due condizioni:
+        </p>
+
+        <div class="compare-container">
+          <div class="compare-box tachi">
+            <span class="status-badge badge-alert" style="margin-bottom: 0.5rem;">Superiore a 100</span>
+            <h4>Tachicardia</h4>
+            <p>
+              Si verifica quando la frequenza cardiaca a riposo supera i 100 battiti al minuto.
+            </p>
+          </div>
+
+          <div class="compare-box bradi">
+            <span class="status-badge badge-info" style="margin-bottom: 0.5rem;">Inferiore a 60</span>
+            <h4>Bradicardia</h4>
+            <p>
+              Si verifica quando la frequenza cardiaca a riposo scende sotto i 60 battiti al minuto.
+            </p>
+          </div>
+        </div>
+
+        <div class="callout" style="--accent-color: var(--c-heart);">
+          <p style="margin-bottom: 0.75rem;">
+            La bradicardia non rappresenta necessariamente un problema, poiché può essere una conseguenza dell'allenamento e dello sviluppo del cuore.
+          </p>
+          <p>
+            Bisogna comunque considerare anche le caratteristiche individuali e gli eventuali fattori genetici. In caso di dubbi sul funzionamento del cuore, si può ricorrere a un <strong>elettrocardiogramma</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEZIONE 3 -->
+    <section id="frequenza-respiratoria">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-resp);">
+          <span>03</span> // APPARATO RESPIRATORIO
+        </div>
+        <h2 class="section-title">3. La frequenza respiratoria</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          La frequenza respiratoria è il numero di atti respiratori compiuti da una persona in un minuto, in condizioni di riposo.
+        </p>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          Un atto respiratorio completo comprende due fasi: l'<strong>inspirazione</strong>, durante la quale l'aria entra nei polmoni, e l'<strong>espirazione</strong>, durante la quale l'aria viene espulsa.
+        </p>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.75rem;">
+          In un soggetto normale, la frequenza respiratoria a riposo è compresa tra <strong>12 e 20 atti respiratori al minuto</strong>.
+        </p>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">Le tre condizioni della frequenza respiratoria</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          In base al numero di atti respiratori si distinguono tre condizioni:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.75rem;">
+          <div style="background: rgba(16, 185, 129, 0.1); border-left: 5px solid var(--c-spo2); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1.25rem 1.4rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem;">
+              <strong style="color: #fff; font-size: 1.25rem;">Eupnea</strong>
+              <span class="status-badge badge-normal">12 - 20 atti/min</span>
+            </div>
+            <p style="font-size: 1.05rem; color: var(--text-muted); margin: 0; line-height: 1.65;">
+              Indica una frequenza respiratoria normale, compresa tra 12 e 20 atti respiratori al minuto.
+            </p>
+          </div>
+
+          <div style="background: rgba(244, 63, 94, 0.1); border-left: 5px solid var(--c-heart); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1.25rem 1.4rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem;">
+              <strong style="color: #fff; font-size: 1.25rem;">Tachipnea</strong>
+              <span class="status-badge badge-alert">> 20 atti/min</span>
+            </div>
+            <p style="font-size: 1.05rem; color: var(--text-muted); margin: 0; line-height: 1.65;">
+              Si verifica quando la frequenza respiratoria supera i 20 atti respiratori al minuto.
+            </p>
+          </div>
+
+          <div style="background: rgba(6, 182, 212, 0.1); border-left: 5px solid var(--c-resp); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1.25rem 1.4rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem;">
+              <strong style="color: #fff; font-size: 1.25rem;">Bradipnea</strong>
+              <span class="status-badge badge-info">< 12 atti/min</span>
+            </div>
+            <p style="font-size: 1.05rem; color: var(--text-muted); margin: 0; line-height: 1.65;">
+              Si verifica quando la frequenza respiratoria scende sotto i 12 atti respiratori al minuto.
+            </p>
+          </div>
+        </div>
+
+        <div class="callout" style="--accent-color: var(--c-resp);">
+          <div class="callout-title">I prefissi tachi- e bradi-</div>
+          <p>
+            I prefissi <em>tachi-</em> e <em>bradi-</em> vengono quindi utilizzati sia per la frequenza cardiaca sia per quella respiratoria, indicando rispettivamente un aumento e una diminuzione della frequenza rispetto ai valori normali.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEZIONE 4 -->
+    <section id="pressione-arteriosa">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-pressure);">
+          <span>04</span> // SISTEMA VASCOLARE
+        </div>
+        <h2 class="section-title">4. La pressione arteriosa</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          La pressione arteriosa è la forza esercitata dal sangue sulle pareti elastiche delle arterie durante la circolazione sanguigna.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          Essa dipende dal flusso sanguigno prodotto dall'attività del cuore.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.5rem;">
+          La pressione arteriosa viene espressa attraverso due valori: la <strong>pressione massima</strong> e la <strong>pressione minima</strong>.
+        </p>
+
+        <div style="background: rgba(139, 92, 246, 0.1); border: 2px solid rgba(139, 92, 246, 0.35); border-radius: var(--radius-md); padding: 1.6rem; margin-bottom: 2rem;">
+          <div style="font-size: 0.95rem; font-weight: 800; text-transform: uppercase; color: var(--c-pressure); margin-bottom: 0.35rem;">Valore normale di riferimento</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 2.8rem; font-weight: 800; color: #fff;">
+            120/80 <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 600;">mmHg</span>
+          </div>
+          <p style="font-size: 1.05rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.65;">
+            Dove i millimetri di mercurio (<strong>mmHg</strong>) rappresentano l'unità di misura della pressione.
+          </p>
+        </div>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">Pressione sistolica e diastolica</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          La <strong>pressione sistolica</strong>, detta anche pressione massima, corrisponde al momento in cui il cuore si contrae e spinge il sangue nell'aorta. Questa fase del movimento cardiaco viene chiamata <strong>sistole</strong>.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          La <strong>pressione diastolica</strong>, detta anche pressione minima, corrisponde invece al momento in cui il cuore si rilassa e si riempie nuovamente di sangue. Questa fase viene chiamata <strong>diastole</strong>.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 2rem;">
+          I valori di riferimento sono quindi circa <strong>120 mmHg per la pressione sistolica</strong> e <strong>80 mmHg per quella diastolica</strong>, con alcune variazioni individuali.
+        </p>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">Ipertensione e ipotensione</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Si parla di <strong>ipertensione arteriosa</strong> quando la pressione risulta eccessivamente elevata rispetto ai valori normali.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Per esempio, una pressione massima di 140 mmHg può indicare una condizione di ipertensione.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Tuttavia, per definire una persona ipertesa, è necessario che la pressione elevata si manifesti con continuità.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Una singola misurazione di 140 mmHg, seguita da valori normali nei giorni successivi, non è sufficiente per considerare una persona ipertesa.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 2rem;">
+          Si parla invece di <strong>ipotensione arteriosa</strong> quando la pressione sanguigna è inferiore ai valori di riferimento.
+        </p>
+
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-bright); border-radius: var(--radius-md); padding: 1.75rem;">
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">Lo sfigmomanometro</h3>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.75rem;">
+            Lo strumento utilizzato per misurare la pressione arteriosa è lo <strong>sfigmomanometro</strong>.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.75rem;">
+            Esistono strumenti manuali e digitali. Quelli digitali sono particolarmente semplici da utilizzare, poiché permettono di effettuare la misurazione premendo un pulsante.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.75rem;">
+            Durante la misurazione, il bracciale viene posizionato intorno al braccio.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.75rem;">
+            Nella spiegazione viene evidenziata l'importanza di far passare il cavo sulla parte anteriore del braccio, in relazione alla posizione dell'<strong>arteria radiale</strong>, che viene descritta come superficiale e situata nella parte anteriore dell'avambraccio.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.75rem;">
+            Per maggiore sicurezza è possibile ripetere la misurazione due volte.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin: 0;">
+            Saper utilizzare questo strumento permette di controllare autonomamente la propria pressione arteriosa, soprattutto quando si avvertono malesseri o improvvisi cali di pressione.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEZIONE 5 -->
+    <section id="temperatura">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-temp);">
+          <span>05</span> // TEMPERATURA
+        </div>
+        <h2 class="section-title">5. La temperatura corporea</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          La temperatura corporea è un altro importante parametro vitale e viene misurata attraverso il <strong>termometro</strong>.
+        </p>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          La temperatura normale varia leggermente da persona a persona, ma generalmente si aggira tra <strong>36,5 e 37 °C</strong>.
+        </p>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          Una temperatura compresa tra 37 e 37,5 °C non viene considerata una vera e propria febbre.
+        </p>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 2rem;">
+          A partire da circa <strong>37,5 °C</strong>, e soprattutto dai <strong>38 °C</strong>, si parla di febbre.
+        </p>
+
+        <div class="card-grid-3" style="margin-bottom: 2rem;">
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+            <span class="status-badge badge-normal" style="margin-bottom: 0.5rem;">Temperatura Normale</span>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 800; color: #fff; margin: 0.35rem 0;">
+              36,5 – 37 °C
+            </div>
+            <p style="font-size: 1rem; color: var(--text-muted);">Varia leggermente da persona a persona</p>
+          </div>
+
+          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+            <span class="status-badge badge-warning" style="margin-bottom: 0.5rem;">Non Vera e Propria Febbre</span>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 800; color: #fde047; margin: 0.35rem 0;">
+              37 – 37,5 °C
+            </div>
+            <p style="font-size: 1rem; color: var(--text-muted);">Temperatura lievemente elevata</p>
+          </div>
+
+          <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.35); border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+            <span class="status-badge badge-alert" style="margin-bottom: 0.5rem;">Febbre</span>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 800; color: #fda4af; margin: 0.35rem 0;">
+              ≥ 37,5 / 38 °C
+            </div>
+            <p style="font-size: 1rem; color: var(--text-muted);">A partire da ~37,5 °C e soprattutto dai 38 °C</p>
+          </div>
+        </div>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">L'importanza di controllare la temperatura</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Anche un piccolo aumento della temperatura corporea può essere significativo quando si manifesta per diversi giorni consecutivi.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Per esempio, una temperatura di <strong>37,2 o 37,3 °C che persiste per cinque giorni o una settimana</strong> potrebbe indicare la presenza di un'infezione nell'organismo.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Questo è particolarmente importante quando il lieve aumento di temperatura è accompagnato da sintomi come <strong>debolezza e spossatezza</strong>.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin: 0;">
+          Un rialzo termico occasionale, che scompare il giorno successivo, è invece diverso da una temperatura lievemente elevata che continua a manifestarsi per più giorni.
+        </p>
+      </div>
+    </section>
+
+    <!-- SEZIONE 6 -->
+    <section id="saturazione">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-spo2);">
+          <span>06</span> // OSSIGENAZIONE
+        </div>
+        <h2 class="section-title">6. La saturazione dell'ossigeno nel sangue</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          La saturazione dell'ossigeno indica la percentuale di ossigeno presente nel sangue.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          L'ossigeno è fondamentale per il funzionamento dell'organismo, perché deve raggiungere tutti gli organi e le cellule del corpo.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.75rem;">
+          Quando la concentrazione di ossigeno nel sangue diminuisce, alcune parti dell'organismo potrebbero non ricevere una quantità sufficiente di ossigeno, causando problemi al loro funzionamento.
+        </p>
+
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 2rem;">
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">Il saturimetro</h3>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.75rem;">
+            Lo strumento utilizzato per misurare la saturazione è il <strong>saturimetro</strong>, chiamato anche <strong>ossimetro</strong>.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.75rem;">
+            È un piccolo dispositivo che viene applicato a un dito e permette di controllare la percentuale di ossigeno nel sangue.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin: 0;">
+            Non deve essere confuso con lo strumento utilizzato per misurare la glicemia, cioè la concentrazione di glucosio nel sangue, particolarmente importante per le persone diabetiche.
+          </p>
+        </div>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">I valori della saturazione</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          In un soggetto adulto, i valori normali della saturazione sono compresi tra <strong>95 e 100%</strong>.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.5rem;">
+          Quando la saturazione diminuisce, si possono distinguere diversi livelli di carenza di ossigeno, chiamata <strong>ipossia</strong>.
+        </p>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 50%;">Condizione</th>
+                <th style="width: 50%;">Saturazione</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color: #ffffff;">Normale</strong></td>
+                <td class="table-mono" style="color: #6ee7b7;">95-100%</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Ipossia lieve</strong></td>
+                <td class="table-mono" style="color: #fde047;">91-94%</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Ipossia moderata</strong></td>
+                <td class="table-mono" style="color: #fb923c;">86-90%</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Ipossia grave</strong></td>
+                <td class="table-mono" style="color: #f43f5e;">Inferiore all'86%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout" style="--accent-color: var(--c-spo2); margin-top: 1.5rem;">
+          <p style="margin-bottom: 0.75rem;">
+            L'<strong>ipossia grave</strong> rappresenta una condizione particolarmente pericolosa e richiede un intervento sanitario urgente, con il <strong>ricorso al pronto soccorso</strong>.
+          </p>
+          <p>
+            Per questo motivo, il saturimetro può essere uno strumento utile per monitorare l'ossigenazione del sangue.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEZIONE 7 -->
+    <section id="dolore">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-pain);">
+          <span>07</span> // PERCEZIONE SOGGETTIVA
+        </div>
+        <h2 class="section-title">7. Il dolore</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          Il dolore è una sensazione soggettiva, perché ogni persona può percepirlo con intensità differente.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          A differenza degli altri parametri vitali, risulta quindi più difficile da valutare attraverso una misurazione oggettiva.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          Il dolore può diventare <strong>invalidante</strong>, cioè così intenso da impedire lo svolgimento delle normali attività quotidiane:
+        </p>
+
+        <ul style="list-style: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; font-size: 1.1rem; color: var(--text-muted); line-height: 1.7;">
+          <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+            <span style="color: var(--c-pain); font-weight: 800; font-size: 1.3rem; line-height: 1;">•</span>
+            <span>Per esempio, un <strong>forte mal di testa</strong> può rendere difficile studiare, concentrarsi oppure mantenere relazioni sociali.</span>
+          </li>
+          <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+            <span style="color: var(--c-pain); font-weight: 800; font-size: 1.3rem; line-height: 1;">•</span>
+            <span>Allo stesso modo, un <strong>intenso dolore alla schiena</strong> può impedire di praticare attività fisica, guidare o persino sedersi.</span>
+          </li>
+        </ul>
+
+        <p style="font-size: 1.15rem; color: #ffffff; font-weight: 600; line-height: 1.75; margin-bottom: 2rem;">
+          Il dolore, quindi, non riguarda soltanto la condizione fisica, ma può influenzare anche la vita emotiva e sociale della persona.
+        </p>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">Dolore acuto e dolore cronico</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          Il dolore può essere distinto in due categorie principali:
+        </p>
+
+        <div class="compare-container">
+          <div class="compare-box" style="border-top: 4px solid #fbbf24;">
+            <span class="status-badge badge-warning" style="margin-bottom: 0.5rem;">Insorgenza Recente</span>
+            <h4>Dolore acuto</h4>
+            <p style="margin-bottom: 0.75rem;">
+              È un dolore di insorgenza recente e di durata generalmente limitata.
+            </p>
+            <p style="font-size: 1rem; color: var(--text-subtle);">
+              Può essere provocato, per esempio, da un colpo ricevuto accidentalmente o da un urto contro un oggetto. In questi casi, il dolore tende progressivamente a diminuire fino a scomparire.
+            </p>
+          </div>
+
+          <div class="compare-box" style="border-top: 4px solid var(--c-pain);">
+            <span class="status-badge" style="background: rgba(236,72,153,0.22); color: #f472b6; border: 1px solid rgba(236,72,153,0.5); margin-bottom: 0.5rem;">Persistente</span>
+            <h4>Dolore cronico</h4>
+            <p style="margin-bottom: 0.75rem;">
+              È un dolore che persiste oltre il normale periodo di guarigione.
+            </p>
+            <p style="font-size: 1rem; color: var(--text-subtle);">
+              Può verificarsi quando, nonostante il passare del tempo o un periodo di riabilitazione, il dolore continua a manifestarsi. Un esempio è rappresentato da un mal di testa che, invece di scomparire definitivamente, continua a ripresentarsi nel tempo.
+            </p>
+          </div>
+        </div>
+
+        <div class="callout" style="--accent-color: var(--c-pain); margin-top: 1.5rem;">
+          <p>
+            La differenza principale tra dolore acuto e dolore cronico riguarda quindi la durata e la persistenza della sensazione dolorosa.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEZIONE 8 -->
+    <section id="attivita-fisica-imc">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-imc);">
+          <span>08</span> // ATTIVITÀ FISICA & INDICI
+        </div>
+        <h2 class="section-title">8. Il monitoraggio dei parametri vitali durante l'attività fisica</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1rem;">
+          Il controllo dei parametri vitali permette di osservare il funzionamento dell'organismo sia in condizioni di riposo sia durante l'attività fisica.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          In particolare, la frequenza cardiaca può essere misurata prima e dopo uno sforzo, per confrontare il numero di battiti del cuore nelle due condizioni.
+        </p>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-bright); border-radius: var(--radius-md); padding: 1.6rem; margin-bottom: 1.75rem;">
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+            Per esempio, una persona potrebbe presentare una frequenza di <strong>67 battiti al minuto a riposo</strong> e di <strong>123 battiti al minuto dopo uno sforzo fisico</strong>, come un test della durata di tre minuti.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+            Attraverso misurazioni periodiche, effettuate a distanza di alcuni mesi, è possibile osservare eventuali miglioramenti della condizione fisica.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin: 0;">
+            La frequenza cardiaca può essere controllata in diversi punti del corpo, attraverso la percezione delle pulsazioni, per esempio a livello dell'<strong>arteria radiale</strong>.
+          </p>
+        </div>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">L'indice di massa corporea</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Oltre ai parametri vitali, un altro indicatore utilizzato per valutare la condizione fisica è l'<strong>indice di massa corporea</strong>, abbreviato <strong>IMC</strong>.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem;">
+          L'IMC viene calcolato mettendo in relazione il peso corporeo e l'altezza della persona.
+        </p>
+
+        <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.35); border-radius: var(--radius-md); padding: 1.6rem; text-align: center; margin-bottom: 1.5rem;">
+          <div style="font-size: 0.95rem; font-weight: 800; text-transform: uppercase; color: #93c5fd; margin-bottom: 0.5rem; letter-spacing: 0.05em;">La formula è:</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 800; color: #fff;">
+            IMC = Peso (kg) / [Altezza (m) × Altezza (m)]
+          </div>
+          <div style="font-size: 1.05rem; color: var(--text-muted); margin-top: 0.65rem; line-height: 1.65;">
+            Per effettuare il calcolo, il peso deve essere espresso in chilogrammi e l'altezza in metri, elevata al quadrato.
+          </div>
+        </div>
+
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 2rem;">
+          Questo indice permette di ottenere un'indicazione sulla condizione ponderale della persona, per esempio se rientra nella categoria del <strong>normopeso</strong>.
+        </p>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 0.85rem;">L'importanza dell'autonomia</h3>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Imparare a misurare i parametri vitali è utile per conoscere meglio il proprio organismo e acquisire maggiore autonomia nella gestione della propria salute.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Attraverso una scheda personale è possibile registrare i valori della frequenza cardiaca a riposo e sotto sforzo, della pressione arteriosa, del peso, dell'altezza e dell'indice di massa corporea.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 0.85rem;">
+          Ripetendo le misurazioni dopo alcuni mesi, si possono confrontare i risultati e verificare eventuali cambiamenti.
+        </p>
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.5rem;">
+          La conoscenza di questi parametri può risultare utile anche nella vita quotidiana, quando si presenta la necessità di controllare le condizioni fisiche proprie o di un'altra persona.
+        </p>
+
+        <!-- Scheda Personale prevista dalla lezione -->
+        <div class="sheet-card">
+          <div style="border-bottom: 2px solid rgba(255,255,255,0.15); padding-bottom: 1rem; margin-bottom: 1rem;">
+            <h4 style="color: #fff; font-size: 1.25rem; font-weight: 800;">Scheda personale</h4>
+            <div style="font-size: 1rem; color: var(--text-muted); margin-top: 0.25rem;">
+              Valori da registrare indicati nella lezione per verificare eventuali cambiamenti a distanza di mesi:
+            </div>
+          </div>
+
+          <div class="sheet-grid">
+            <div class="sheet-field">
+              <div class="sheet-field-title">Frequenza cardiaca a riposo</div>
+              <input type="text" placeholder="battiti al minuto" class="sheet-field-input">
+            </div>
+
+            <div class="sheet-field">
+              <div class="sheet-field-title">Frequenza cardiaca sotto sforzo</div>
+              <input type="text" placeholder="battiti al minuto" class="sheet-field-input">
+            </div>
+
+            <div class="sheet-field">
+              <div class="sheet-field-title">Pressione arteriosa</div>
+              <input type="text" placeholder="es. 120/80 mmHg" class="sheet-field-input">
+            </div>
+
+            <div class="sheet-field">
+              <div class="sheet-field-title">Peso</div>
+              <input type="text" placeholder="in kg" class="sheet-field-input">
+            </div>
+
+            <div class="sheet-field">
+              <div class="sheet-field-title">Altezza</div>
+              <input type="text" placeholder="in metri" class="sheet-field-input">
+            </div>
+
+            <div class="sheet-field">
+              <div class="sheet-field-title">Indice di massa corporea (IMC)</div>
+              <input type="text" placeholder="Peso / (Altezza × Altezza)" class="sheet-field-input">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEMA RIEPILOGATIVO -->
+    <section id="riepilogo">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-resp);">
+          <span>09</span> // QUADRO RIEPILOGATIVO
+        </div>
+        <h2 class="section-title">Schema riepilogativo</h2>
+      </div>
+
+      <div class="card">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 45%;">Parametro</th>
+                <th style="width: 55%;">Valori normali indicati nella lezione</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color: #ffffff;">Frequenza cardiaca</strong></td>
+                <td class="table-mono" style="color: #ffffff;">60-100 battiti/min</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Frequenza respiratoria</strong></td>
+                <td class="table-mono" style="color: #ffffff;">12-20 atti/min</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Pressione arteriosa</strong></td>
+                <td class="table-mono" style="color: #ffffff;">Circa 120/80 mmHg</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Temperatura corporea</strong></td>
+                <td class="table-mono" style="color: #ffffff;">36,5-37 °C</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Saturazione dell'ossigeno</strong></td>
+                <td class="table-mono" style="color: #ffffff;">95-100%</td>
+              </tr>
+              <tr>
+                <td><strong style="color: #ffffff;">Dolore</strong></td>
+                <td style="color: #ffffff; font-size: 1.15rem; font-weight: 600;">Sensazione soggettiva; acuto o cronico</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TERMINI FONDAMENTALI -->
+    <section id="termini">
+      <div class="section-header">
+        <div class="section-eyebrow" style="--accent-color: var(--c-pressure);">
+          <span>10</span> // VOCABOLARIO DELLA LEZIONE
+        </div>
+        <h2 class="section-title">Termini fondamentali</h2>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.5rem;">
+          I termini fondamentali indicati nello schema finale del documento:
+        </p>
+
+        <div class="terms-tag-cloud">
+          <span class="term-tag">frequenza cardiaca</span>
+          <span class="term-tag">tachicardia</span>
+          <span class="term-tag">bradicardia</span>
+          <span class="term-tag">frequenza respiratoria</span>
+          <span class="term-tag">eupnea</span>
+          <span class="term-tag">tachipnea</span>
+          <span class="term-tag">bradipnea</span>
+          <span class="term-tag">sistole</span>
+          <span class="term-tag">diastole</span>
+          <span class="term-tag">ipertensione</span>
+          <span class="term-tag">ipotensione</span>
+          <span class="term-tag">sfigmomanometro</span>
+          <span class="term-tag">saturimetro</span>
+          <span class="term-tag">ipossia</span>
+          <span class="term-tag">dolore acuto</span>
+          <span class="term-tag">dolore cronico</span>
+          <span class="term-tag">indice di massa corporea</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div>
+        <strong style="color: #fff; font-size: 1.15rem;">I PARAMETRI VITALI</strong>
+        <p style="color: var(--text-muted); margin-top: 0.35rem;">Relazione didattica sui parametri vitali</p>
+      </div>
+      <div>
+        <button class="btn-action" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          <span>Torna all'inizio</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function setFontSize(size) {
+      document.documentElement.setAttribute('data-font-size', size);
+      localStorage.setItem('parametriVitali_fontSize', size);
+
+      document.querySelectorAll('.btn-font-size').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const activeBtn = document.getElementById('fs-' + size);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function initFontSize() {
+      const saved = localStorage.getItem('parametriVitali_fontSize') || 'large';
+      setFontSize(saved);
+    }
+
+    window.addEventListener('scroll', () => {
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (window.scrollY / docHeight) * 100;
+      const bar = document.getElementById('readingBar');
+      if (bar) bar.style.width = scrolled + '%';
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initFontSize();
+    });
+  </script>
+</body>
+</html>
